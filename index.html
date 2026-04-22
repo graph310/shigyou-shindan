@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>士業向け 無料Web課題診断ツール | Graph 310°</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue-dark: #1A43AA;
+      --blue-mid: #15A2E9;
+      --blue-light: #E0E6F4;
+      --blue-bg: #F0F4FA;
+      --white: #FFFFFF;
+      --text: #1A1A2E;
+      --gray: #6B7280;
+      --border: #C8D8EE;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--blue-bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      background: var(--blue-dark);
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .header-title {
+      color: var(--white);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .header-title span {
+      color: rgba(255,255,255,0.7);
+      font-weight: 400;
+      font-size: 13px;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(160deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+      padding: 40px 20px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 16px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      letter-spacing: 0.08em;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .hero h1 {
+      font-size: clamp(22px, 6vw, 34px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 em {
+      color: #FFD84D;
+      font-style: normal;
+      border-bottom: 3px solid #FFD84D;
+    }
+
+    .hero p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.8;
+      margin-bottom: 24px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 28px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 340px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .stat { flex: 1; padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.15); text-align: center; }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-size: 22px; font-weight: 900; color: #FFD84D; display: block; }
+    .stat-label { font-size: 11px; color: rgba(255,255,255,0.7); display: block; margin-top: 2px; }
+
+    /* 女性画像スペース */
+    .hero-inner {
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      text-align: left;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-text { flex: 1; padding-bottom: 32px; }
+
+    .hero-image-area {
+      width: 140px;
+      flex-shrink: 0;
+      align-self: flex-end;
+    }
+
+    .hero-image-placeholder {
+      width: 140px;
+      height: 220px;
+      border-radius: 8px 8px 0 0;
+      background: rgba(255,255,255,0.1);
+      border: 2px dashed rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+      color: rgba(255,255,255,0.5);
+      font-size: 11px;
+    }
+
+    .hero-image-area img {
+      width: 140px;
+      height: 220px;
+      object-fit: cover;
+      object-position: top;
+      border-radius: 8px 8px 0 0;
+    }
+
+    /* START BUTTON AREA */
+    .start-area {
+      background: var(--white);
+      padding: 28px 20px;
+      text-align: center;
+      border-bottom: 3px solid var(--blue-light);
+    }
+
+    .start-btn {
+      background: var(--blue-dark);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      padding: 18px 40px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      width: 100%;
+      max-width: 400px;
+      display: block;
+      margin: 0 auto;
+    }
+    .start-btn:hover { background: #0E3278; transform: translateY(-1px); }
+
+    /* MAIN */
+    main { max-width: 600px; margin: 0 auto; padding: 0 16px 60px; }
+
+    /* PROGRESS */
+    .progress-wrap { padding: 24px 0 16px; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .progress-step { font-size: 14px; font-weight: 700; color: var(--blue-dark); }
+    .progress-pct { font-size: 14px; font-weight: 700; color: var(--blue-dark); }
+    .progress-track { height: 6px; background: var(--border); border-radius: 99px; }
+    .progress-fill { height: 6px; background: linear-gradient(90deg, var(--blue-dark), var(--blue-mid)); border-radius: 99px; transition: width 0.4s ease; }
+
+    /* QUESTION CARD */
+    .q-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 28px 22px;
+      box-shadow: 0 2px 12px rgba(26,67,170,0.1);
+      border: 1px solid var(--border);
+      animation: fadeUp 0.4s ease both;
+    }
+    .q-category {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--blue-dark);
+      background: var(--blue-light);
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+    .q-text { font-size: 20px; font-weight: 900; color: var(--text); line-height: 1.5; margin-bottom: 20px; }
+    .multi-hint { font-size: 13px; color: var(--gray); margin-bottom: 14px; }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .opt-btn {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .opt-btn:hover { border-color: var(--blue-dark); background: var(--blue-light); }
+    .opt-btn.selected { border-color: var(--blue-dark); background: var(--blue-light); color: var(--blue-dark); font-weight: 700; }
+    .opt-mark {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      color: var(--gray);
+      background: var(--blue-bg);
+    }
+    .opt-btn.selected .opt-mark { background: var(--blue-dark); color: var(--white); border-color: var(--blue-dark); }
+
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+    .back-btn {
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 24px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .back-btn:hover { border-color: var(--gray); color: var(--text); }
+    .next-btn {
+      background: var(--blue-dark);
+      border: none;
+      border-radius: 6px;
+      padding: 14px 32px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.15s;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .next-btn.active { opacity: 1; pointer-events: auto; }
+    .next-btn.active:hover { background: #0E3278; }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 60px 0; }
+    .loading-ring {
+      width: 56px; height: 56px;
+      border: 4px solid var(--border);
+      border-top-color: var(--blue-dark);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      animation: spin 0.9s linear infinite;
+    }
+    .loading-text { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 24px; }
+    .loading-steps { display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto; }
+    .loading-step {
+      font-size: 14px; color: var(--border); text-align: left;
+      opacity: 0; transition: all 0.5s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .loading-step.show { opacity: 1; color: var(--gray); }
+    .loading-step.done { color: var(--blue-dark); font-weight: 700; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* RESULT */
+    .result-hero {
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+      padding: 32px 20px;
+      text-align: center;
+      border-radius: 10px;
+      margin-top: 24px;
+      margin-bottom: 16px;
+    }
+    .result-label { font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: #FFD84D; display: block; margin-bottom: 10px; }
+    .result-title { font-size: clamp(17px, 4.5vw, 22px); font-weight: 900; color: var(--white); line-height: 1.5; margin-bottom: 8px; }
+    .result-sub { font-size: 13px; color: rgba(255,255,255,0.75); }
+
+    .card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 24px 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(26,67,170,0.08);
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--blue-dark);
+      border-left: 4px solid var(--blue-dark);
+      padding-left: 10px;
+      margin-bottom: 18px;
+    }
+    .score-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+    .score-label { font-size: 15px; font-weight: 700; color: var(--text); }
+    .score-value { font-size: 44px; font-weight: 900; color: var(--blue-dark); line-height: 1; }
+    .score-value span { font-size: 18px; color: var(--gray); }
+    .score-track { height: 8px; background: var(--blue-light); border-radius: 99px; margin-bottom: 12px; }
+    .score-fill { height: 8px; background: linear-gradient(90deg, var(--blue-dark), var(--blue-mid)); border-radius: 99px; transition: width 1s ease; }
+    .score-comment { font-size: 14px; color: var(--gray); line-height: 1.7; }
+
+    .issue-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--blue-light); }
+    .issue-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .issue-icon {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      background: var(--blue-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .issue-text strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .issue-text p { font-size: 13px; color: var(--gray); line-height: 1.6; }
+
+    .budget-card {
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+      border-radius: 10px;
+      padding: 24px 20px;
+      margin-bottom: 14px;
+    }
+    .budget-label { font-size: 12px; font-weight: 700; letter-spacing: 0.15em; color: #FFD84D; display: block; margin-bottom: 8px; }
+    .budget-range { font-size: 36px; font-weight: 900; color: var(--white); margin-bottom: 8px; line-height: 1.2; }
+    .budget-note { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+    .cta-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 28px 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(26,67,170,0.08);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .cta-card h3 { font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 10px; }
+    .cta-card p { font-size: 14px; color: var(--gray); line-height: 1.7; margin-bottom: 22px; }
+    .email-input {
+      width: 100%;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 15px 16px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-input:focus { border-color: var(--blue-dark); }
+    .email-input::placeholder { color: #B0B8C4; }
+    .cta-btn {
+      width: 100%;
+      background: var(--blue-dark);
+      border: none;
+      border-radius: 6px;
+      padding: 18px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 17px;
+      font-weight: 900;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+    .cta-btn:hover { background: #0E3278; }
+    .cta-note { font-size: 12px; color: var(--gray); margin-top: 10px; }
+    .thanks-msg { display: none; padding: 20px 0; }
+    .thanks-msg.show { display: block; }
+    .thanks-msg h4 { font-size: 20px; font-weight: 900; color: var(--blue-dark); margin-bottom: 10px; }
+    .thanks-msg p { font-size: 14px; color: var(--gray); line-height: 1.7; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 24px 20px;
+      background: var(--blue-dark);
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.05em;
+    }
+    footer .footer-logo { color: var(--white); font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px; }
+
+    .hidden { display: none !important; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header onclick="goTop()" style="cursor:pointer;">
+  <div class="header-title">士業向け · 無料Web課題診断ツール</div>
+</header>
+
+<!-- HERO -->
+<div class="hero" id="hero-section">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">無料 · 約2分 · 即時結果表示</div>
+      <h1>貴事務所の<br>Webサイト、<br><em>機会損失</em><br>していませんか？</h1>
+      <p>5つの質問に答えるだけで、Web課題と改善の優先度、概算費用の目安がわかります。</p>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">2分</span><span class="stat-label">所要時間</span></div>
+        <div class="stat"><span class="stat-num">無料</span><span class="stat-label">費用</span></div>
+        <div class="stat"><span class="stat-num">即時</span><span class="stat-label">結果表示</span></div>
+      </div>
+    </div>
+    <!-- 女性画像スペース -->
+    <div class="hero-image-area">
+      <div class="hero-image-placeholder">
+        <span style="font-size:24px">👤</span>
+        <span>画像を<br>差し替え</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- START BUTTON -->
+<div class="start-area" id="start-area">
+  <button class="start-btn" onclick="startDiagnosis()">無料で診断をはじめる →</button>
+</div>
+
+<main>
+  <section class="hidden" id="quiz-section">
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <span class="progress-step" id="prog-step">STEP 1 / 5</span>
+        <span class="progress-pct" id="prog-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="q-card" id="q-card">
+      <div class="q-category" id="q-category"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="multi-hint hidden" id="multi-hint">複数選択できます</div>
+      <div class="options" id="q-opts"></div>
+      <div class="nav-row">
+        <button class="back-btn" id="back-btn" onclick="prevQ()">← 戻る</button>
+        <button class="next-btn" id="next-btn" onclick="nextQ()">次へ →</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="hidden loading" id="loading-section">
+    <div class="loading-ring"></div>
+    <div class="loading-text">診断結果を分析中...</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="ls1"><span class="step-dot"></span>業種プロファイルを確認</div>
+      <div class="loading-step" id="ls2"><span class="step-dot"></span>Web課題を特定</div>
+      <div class="loading-step" id="ls3"><span class="step-dot"></span>改善優先度を算出</div>
+      <div class="loading-step" id="ls4"><span class="step-dot"></span>概算費用を計算</div>
+    </div>
+  </section>
+
+  <section class="hidden" id="result-section">
+    <div class="result-hero">
+      <span class="result-label">診断結果</span>
+      <div class="result-title" id="res-title"></div>
+      <div class="result-sub" id="res-sub"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">WEB改善ポテンシャル</div>
+      <div class="score-row">
+        <span class="score-label">総合スコア</span>
+        <div class="score-value" id="res-score">0<span>点</span></div>
+      </div>
+      <div class="score-track"><div class="score-fill" id="res-bar" style="width:0%"></div></div>
+      <div class="score-comment" id="res-comment"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">課題・改善ポイント</div>
+      <div id="res-issues"></div>
+    </div>
+    <div class="budget-card">
+      <span class="budget-label">概算費用の目安</span>
+      <div class="budget-range" id="res-budget"></div>
+      <div class="budget-note" id="res-budget-note"></div>
+    </div>
+    <div class="cta-card">
+      <h3>まずは無料でご相談ください</h3>
+      <p>診断結果をもとに、貴事務所に合った改善プランをご提案します。返信は24時間以内。費用は一切かかりません。</p>
+      <div id="form-area">
+        <input class="email-input" type="email" id="email-input" placeholder="メールアドレスを入力してください">
+        <button class="cta-btn" onclick="submitContact()">相談する（無料）</button>
+        <p class="cta-note">送信後、Graph 310°よりご連絡いたします。</p>
+      </div>
+      <div class="thanks-msg" id="thanks-msg">
+        <h4>ありがとうございます</h4>
+        <p>診断結果とともに、24時間以内にご連絡いたします。<br>しばらくお待ちください。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span class="footer-logo">Graph 310°</span>
+  © 2025 Graph 310°. All rights reserved.
+</footer>
+
+<script>
+function goTop(){
+  document.getElementById('hero-section').classList.remove('hidden');
+  document.getElementById('start-area').classList.remove('hidden');
+  document.getElementById('quiz-section').classList.add('hidden');
+  document.getElementById('loading-section').classList.add('hidden');
+  document.getElementById('result-section').classList.add('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+const questions = [
+  { category:"BASIC INFO", text:"事務所の業種をお聞かせください", type:"single", options:["税理士・会計士","社会保険労務士","行政書士","司法書士","弁護士","その他士業"], scores:[10,10,10,10,10,8] },
+  { category:"CURRENT STATUS", text:"現在のWebサイトの状況は？", type:"single", options:["5年以上更新していない","2〜5年前に制作したが更新少ない","比較的新しいが問い合わせが来ない","サイト自体がない"], scores:[20,15,12,25] },
+  { category:"ISSUES", text:"現在感じているWeb上の課題を選んでください", type:"multi", options:["問い合わせがほとんど来ない","他事務所との差別化ができていない","サービス内容が伝わりにくい","スマホで見づらい","更新・管理が難しい","検索で上位に出てこない"], scores:[8,7,8,6,5,7] },
+  { category:"TARGET", text:"特に強化したい集客・案件の種類は？", type:"single", options:["相続・資産承継","助成金・労務相談","外国人ビザ・許認可","一般的な顧問契約","スポット相談・セミナー","特になし"], scores:[15,12,12,10,8,5] },
+  { category:"BUDGET", text:"Web改善への投資予算感をお聞かせください", type:"single", options:["〜10万円","10〜30万円","30〜50万円","50万円以上","まずは相談してから決めたい"], scores:[5,10,15,20,12], budgets:["〜10万円","10〜30万円","30〜50万円","50万円〜","要相談"] }
+];
+
+const issueMap = {
+  "税理士・会計士":[{icon:"📋",title:"相続・資産承継LPの不在",desc:"単価の高い相続案件を取りこぼしている可能性があります。専門LPで差別化を。"},{icon:"🤝",title:"信頼感の設計不足",desc:"実績・資格・人柄が伝わるデザインで、問い合わせ前の不安を取り除きます。"},{icon:"📱",title:"スマホ対応・UI改善",desc:"スマホから検索する層へのアプローチが不十分な場合が多い業種です。"}],
+  "社会保険労務士":[{icon:"💡",title:"助成金情報の打ち出し不足",desc:"助成金・補助金に関する情報が埋もれています。専用LPで問い合わせを増やせます。"},{icon:"⚡",title:"問い合わせ導線の弱さ",desc:"相談フォームや電話番号の配置が最適化されていないケースが多いです。"},{icon:"📊",title:"実績・事例の見せ方",desc:"支援実績を視覚化することで、信頼性が大きく向上します。"}],
+  "行政書士":[{icon:"🌍",title:"多言語対応の必要性",desc:"外国人ビザ・許認可案件は、やさしい日本語や多言語対応が差別化につながります。"},{icon:"🎯",title:"専門分野の明確化",desc:"「何でもできる」より「これが得意」を明示する方が選ばれやすいです。"},{icon:"🔒",title:"安心感・親しみやすさの設計",desc:"敷居の高さを感じさせないUI・コピーで問い合わせハードルを下げます。"}]
+};
+
+const defaultIssues=[{icon:"🎯",title:"専門性の可視化",desc:"得意分野・専門領域を前面に出し、「この人に頼みたい」を設計します。"},{icon:"📱",title:"モバイル対応・UI改善",desc:"スマホからの検索・閲覧に最適化されたUI設計が重要です。"},{icon:"⚡",title:"問い合わせ導線の整備",desc:"見込み客が迷わず相談できる導線設計で、機会損失を防ぎます。"}];
+
+let cur=0,answers=[],multiSelections=[],selectedBudget="";
+
+function startDiagnosis(){
+  document.getElementById('hero-section').classList.add('hidden');
+  document.getElementById('start-area').classList.add('hidden');
+  document.getElementById('quiz-section').classList.remove('hidden');
+  answers=new Array(questions.length).fill(null);
+  multiSelections=[];cur=0;renderQ();
+}
+
+function renderQ(){
+  const q=questions[cur];
+  document.getElementById('q-category').textContent=q.category;
+  document.getElementById('q-text').textContent=q.text;
+  document.getElementById('prog-step').textContent=`STEP ${cur+1} / ${questions.length}`;
+  const pct=Math.round((cur/questions.length)*100);
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-fill').style.width=pct+'%';
+  const mh=document.getElementById('multi-hint');
+  q.type==='multi'?mh.classList.remove('hidden'):mh.classList.add('hidden');
+  if(q.type==='multi') multiSelections=answers[cur]?[...answers[cur]]:[];
+  document.getElementById('back-btn').style.visibility=cur===0?'hidden':'visible';
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  const labels=['A','B','C','D','E','F'];
+  q.options.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    if(q.type==='single'&&answers[cur]===i) btn.classList.add('selected');
+    if(q.type==='multi'&&multiSelections.includes(i)) btn.classList.add('selected');
+    btn.innerHTML=`<span class="opt-mark">${labels[i]}</span>${opt}`;
+    btn.onclick=()=>{
+      if(q.type==='single'){
+        answers[cur]=i;
+        if(cur===questions.length-1) selectedBudget=q.budgets[i];
+        document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('next-btn').classList.add('active');
+      } else {
+        const idx=multiSelections.indexOf(i);
+        idx>-1?multiSelections.splice(idx,1):multiSelections.push(i);
+        btn.classList.toggle('selected');
+        answers[cur]=multiSelections.length>0?[...multiSelections]:null;
+        document.getElementById('next-btn').classList[multiSelections.length>0?'add':'remove']('active');
+      }
+    };
+    opts.appendChild(btn);
+  });
+  const hasAns=q.type==='multi'?multiSelections.length>0:answers[cur]!==null;
+  document.getElementById('next-btn').classList[hasAns?'add':'remove']('active');
+  document.getElementById('q-card').style.animation='none';
+  void document.getElementById('q-card').offsetWidth;
+  document.getElementById('q-card').style.animation='fadeUp 0.4s ease both';
+}
+
+function nextQ(){ cur<questions.length-1?(cur++,renderQ()):showLoading(); }
+function prevQ(){ if(cur>0){cur--;renderQ();} }
+
+function showLoading(){
+  document.getElementById('quiz-section').classList.add('hidden');
+  document.getElementById('loading-section').classList.remove('hidden');
+  ['ls1','ls2','ls3','ls4'].forEach((id,i)=>{
+    setTimeout(()=>{
+      document.getElementById(id).classList.add('show');
+      if(i>0) document.getElementById(['ls1','ls2','ls3','ls4'][i-1]).classList.add('done');
+    },i*700);
+  });
+  setTimeout(showResult,3200);
+}
+
+function showResult(){
+  document.getElementById('loading-section').classList.add('hidden');
+  document.getElementById('result-section').classList.remove('hidden');
+  const industry=questions[0].options[answers[0]]||"士業";
+  let score=0;
+  answers.forEach((ans,qi)=>{
+    if(Array.isArray(ans)) ans.forEach(i=>score+=questions[qi].scores[i]);
+    else if(ans!==null) score+=questions[qi].scores[ans];
+  });
+  score=Math.min(100,score);
+  document.getElementById('res-title').textContent=`${industry}として、Webで${score>=70?'大きな':score>=50?'一定の':'基本的な'}改善余地があります`;
+  document.getElementById('res-sub').textContent='以下に課題の詳細と改善の方向性をまとめました';
+  setTimeout(()=>{
+    document.getElementById('res-score').innerHTML=`${score}<span>点</span>`;
+    document.getElementById('res-bar').style.width=score+'%';
+  },300);
+  const comment=score>=70?'改善ポテンシャルが高い状態です。適切なWeb整備により、問い合わせ数の大幅な増加が見込めます。':score>=50?'複数の課題が確認されます。優先度の高い改善から着手することで、効果的に集客力を高められます。':'基礎的な整備から始めることで、着実に問い合わせ増加につながります。';
+  document.getElementById('res-comment').textContent=comment;
+  const issueList=issueMap[industry]||defaultIssues;
+  document.getElementById('res-issues').innerHTML=issueList.map(issue=>`<div class="issue-item"><div class="issue-icon">${issue.icon}</div><div class="issue-text"><strong>${issue.title}</strong><p>${issue.desc}</p></div></div>`).join('');
+  let budgetRange='',budgetNote='';
+  if(!selectedBudget||selectedBudget==='要相談'){
+    budgetRange=score>=70?'30〜80万円':score>=50?'15〜40万円':'10〜25万円';
+    budgetNote='ご状況に合わせた最適なプランをご提案します。';
+  } else {
+    budgetRange=selectedBudget;
+    budgetNote='ご予算に合わせた最適なプランをご提案します。まずはお気軽にご相談ください。';
+  }
+  document.getElementById('res-budget').textContent=budgetRange;
+  document.getElementById('res-budget-note').textContent=budgetNote;
+}
+
+function submitContact(){
+  const email=document.getElementById('email-input').value;
+  if(!email||!email.includes('@')){alert('メールアドレスを正しく入力してください');return;}
+  document.getElementById('form-area').style.display='none';
+  document.getElementById('thanks-msg').classList.add('show');
+}
+</script>
+</body>
+</html>
