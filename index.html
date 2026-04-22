@@ -40,12 +40,21 @@
 
     /* HERO */
     .hero {
-      background: url('img/fv_bg.jpg') center top / 100% auto no-repeat;
-      padding-top: calc(100vw * 1.4);
       position: relative;
-      overflow: hidden;
       max-width: 480px;
       margin: 0 auto;
+    }
+    .hero-img {
+      width: 100%;
+      display: block;
+    }
+    .hero-btn-overlay {
+      position: absolute;
+      top: 89%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 88%;
+      z-index: 10;
     }
 
     .hero-eyebrow {
@@ -105,10 +114,6 @@
 
 
     /* HERO BUTTON */
-    .hero-btn-area {
-      padding: 20px 20px 28px;
-    }
-
     .start-btn {
       background: var(--blue-dark);
       color: var(--white);
@@ -375,7 +380,8 @@
 
 <!-- HERO -->
 <div class="hero" id="hero-section">
-  <div class="hero-btn-area">
+  <img class="hero-img" src="img/fv_bg.jpg" alt="士業向け無料ホームページ印象診断">
+  <div class="hero-btn-overlay">
     <button class="start-btn" onclick="startDiagnosis()">今すぐ無料診断</button>
   </div>
 </div>
