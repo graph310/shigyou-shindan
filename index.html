@@ -40,11 +40,12 @@
 
     /* HERO */
     .hero {
-      background: url('img/fv_bg.jpg') center top / cover no-repeat;
-      padding: 0;
-      text-align: left;
+      background: url('img/fv_bg.jpg') center top / 100% auto no-repeat;
+      padding-top: calc(100vw * 1.4);
       position: relative;
       overflow: hidden;
+      max-width: 480px;
+      margin: 0 auto;
     }
 
     .hero-eyebrow {
@@ -101,37 +102,18 @@
     .stat-num { font-size: 22px; font-weight: 900; color: #FFD84D; display: block; }
     .stat-label { font-size: 11px; color: rgba(255,255,255,0.7); display: block; margin-top: 2px; }
 
-    /* HERO INNER */
-    .hero-inner {
-      position: relative;
-      min-height: 400px;
-      padding: 40px 20px 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
 
-    .hero-text {
-      max-width: 55%;
-      position: relative;
-      z-index: 2;
-    }
 
-    .hero-image-area { display: none; }
-
-    /* START BUTTON AREA */
-    .start-area {
-      background: var(--white);
-      padding: 28px 20px;
-      text-align: center;
-      border-bottom: 3px solid var(--blue-light);
+    /* HERO BUTTON */
+    .hero-btn-area {
+      padding: 20px 20px 28px;
     }
 
     .start-btn {
       background: var(--blue-dark);
       color: var(--white);
       border: none;
-      border-radius: 6px;
+      border-radius: 40px;
       padding: 18px 40px;
       font-family: 'Noto Sans JP', sans-serif;
       font-size: 17px;
@@ -140,9 +122,7 @@
       letter-spacing: 0.05em;
       transition: all 0.2s;
       width: 100%;
-      max-width: 400px;
       display: block;
-      margin: 0 auto;
     }
     .start-btn:hover { background: #0E3278; transform: translateY(-1px); }
 
@@ -397,27 +377,9 @@
 
 <!-- HERO -->
 <div class="hero" id="hero-section">
-  <div class="hero-inner">
-    <div class="hero-text">
-      <div class="hero-eyebrow">紹介に頼らない集客を。</div>
-      <h1>そのWebサイト、<br>問い合わせを<br><em>逃していません</em>か？</h1>
-      <p>5つの質問に答えるだけで、改善点・優先順位・概算費用がわかります。</p>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-num">2分</span><span class="stat-label">所要時間</span></div>
-        <div class="stat"><span class="stat-num">無料</span><span class="stat-label">費用</span></div>
-        <div class="stat"><span class="stat-num">即時</span><span class="stat-label">結果表示</span></div>
-      </div>
-    </div>
-    <!-- 女性画像スペース -->
-    <div class="hero-image-area">
-      <img src="img/woman.png" alt="担当者">
-    </div>
+  <div class="hero-btn-area">
+    <button class="start-btn" onclick="startDiagnosis()">今すぐ無料診断</button>
   </div>
-</div>
-
-<!-- START BUTTON -->
-<div class="start-area" id="start-area">
-  <button class="start-btn" onclick="startDiagnosis()">今すぐ無料診断</button>
 </div>
 
 <main>
