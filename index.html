@@ -51,9 +51,9 @@
     .hero-btn-overlay {
       position: absolute;
       top: 84.7%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 97%;
+      left: 0;
+      right: 0;
+      width: 100%;
       z-index: 10;
     }
 
@@ -121,7 +121,7 @@
       padding: 0;
       cursor: pointer;
       width: 100%;
-      height: calc(100vw * 0.064);
+      height: calc(100vw * 0.12);
       display: block;
       -webkit-tap-highlight-color: transparent;
     }
@@ -487,10 +487,13 @@ let cur=0,answers=[],multiSelections=[],selectedBudget="";
 
 function startDiagnosis(){
   document.getElementById('hero-section').classList.add('hidden');
-  document.getElementById('start-area').classList.add('hidden');
   document.getElementById('quiz-section').classList.remove('hidden');
+  document.getElementById('loading-section').classList.add('hidden');
+  document.getElementById('result-section').classList.add('hidden');
   answers=new Array(questions.length).fill(null);
-  multiSelections=[];cur=0;renderQ();
+  multiSelections=[];cur=0;
+  window.scrollTo({top:0, behavior:'smooth'});
+  renderQ();
 }
 
 function renderQ(){
