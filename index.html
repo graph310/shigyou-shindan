@@ -464,15 +464,6 @@
 
 
 <script>
-function goTop(){
-  document.getElementById('hero-section').classList.remove('hidden');
-  document.getElementById('start-area').classList.remove('hidden');
-  document.getElementById('quiz-section').classList.add('hidden');
-  document.getElementById('loading-section').classList.add('hidden');
-  document.getElementById('result-section').classList.add('hidden');
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
 const questions = [
   {
     id:"industry",
@@ -512,8 +503,7 @@ const questions = [
     text:"今回、最も改善したいことを教えてください",
     type:"single",
     options:["問い合わせを増やしたい","採用を強化したい","営業・商談で使う資料を改善したい","展示会や広告の反応を改善したい","何から改善すればいいかわからない"],
-    scores:[15,12,10,10,8],
-    branchOnIndex: 0
+    scores:[15,12,10,10,8]
   },
   {
     id:"inquiry_status",
@@ -522,7 +512,7 @@ const questions = [
     type:"single",
     options:["ほとんど来ない","月に1〜2件","一定数あるが質が悪い","問い合わせはあるが安定しない"],
     scores:[15,12,10,10],
-    isBranch: true
+    isBranch:true
   },
   {
     id:"authority",
@@ -560,177 +550,219 @@ const questions = [
 ];
 
 const issueMap = {
-  "税理士・会計士":[{icon:"📋",title:"相続・資産承継LPの不在",desc:"単価の高い相続案件を取りこぼしている可能性があります。専門LPで差別化を。"},{icon:"🤝",title:"信頼感の設計不足",desc:"実績・資格・人柄が伝わるデザインで、問い合わせ前の不安を取り除きます。"},{icon:"📱",title:"スマホ対応・UI改善",desc:"スマホから検索する層へのアプローチが不十分な場合が多い業種です。"}],
-  "社会保険労務士":[{icon:"💡",title:"助成金情報の打ち出し不足",desc:"助成金・補助金に関する情報が埋もれています。専用LPで問い合わせを増やせます。"},{icon:"⚡",title:"問い合わせ導線の弱さ",desc:"相談フォームや電話番号の配置が最適化されていないケースが多いです。"},{icon:"📊",title:"実績・事例の見せ方",desc:"支援実績を視覚化することで、信頼性が大きく向上します。"}],
-  "行政書士":[{icon:"🌍",title:"多言語対応の必要性",desc:"外国人ビザ・許認可案件は、やさしい日本語や多言語対応が差別化につながります。"},{icon:"🎯",title:"専門分野の明確化",desc:"「何でもできる」より「これが得意」を明示する方が選ばれやすいです。"},{icon:"🔒",title:"安心感・親しみやすさの設計",desc:"敷居の高さを感じさせないUI・コピーで問い合わせハードルを下げます。"}]
+  "税務・会計系":[{icon:"📋",title:"相続・資産承継LPの不在",desc:"単価の高い相続案件を取りこぼしている可能性があります。専門LPで差別化を。"},{icon:"🤝",title:"信頼感の設計不足",desc:"実績・資格・人柄が伝わるデザインで、問い合わせ前の不安を取り除きます。"},{icon:"📱",title:"スマホ対応・UI改善",desc:"スマホから検索する層へのアプローチが不十分な場合が多い業種です。"}],
+  "労務・人事系":[{icon:"💡",title:"助成金情報の打ち出し不足",desc:"助成金・補助金に関する情報が埋もれています。専用LPで問い合わせを増やせます。"},{icon:"⚡",title:"問い合わせ導線の弱さ",desc:"相談フォームや電話番号の配置が最適化されていないケースが多いです。"},{icon:"📊",title:"実績・事例の見せ方",desc:"支援実績を視覚化することで、信頼性が大きく向上します。"}],
+  "許認可・手続き系":[{icon:"🌍",title:"多言語対応の必要性",desc:"外国人ビザ・許認可案件は、やさしい日本語や多言語対応が差別化につながります。"},{icon:"🎯",title:"専門分野の明確化",desc:"「何でもできる」より「これが得意」を明示する方が選ばれやすいです。"},{icon:"🔒",title:"安心感・親しみやすさの設計",desc:"敷居の高さを感じさせないUI・コピーで問い合わせハードルを下げます。"}]
 };
 
 const defaultIssues=[{icon:"🎯",title:"専門性の可視化",desc:"得意分野・専門領域を前面に出し、「この人に頼みたい」を設計します。"},{icon:"📱",title:"モバイル対応・UI改善",desc:"スマホからの検索・閲覧に最適化されたUI設計が重要です。"},{icon:"⚡",title:"問い合わせ導線の整備",desc:"見込み客が迷わず相談できる導線設計で、機会損失を防ぎます。"}];
 
-let cur=0,answers=[],multiSelections=[],selectedBudget="";
+let cur = 0;
+let answers = {};
+let multiSelections = [];
+let selectedBudget = "";
 
-function startDiagnosis(){
+function getVisibleIndexes() {
+  const list = [0,1,2,3,4];
+  if (answers[4] === 0) list.push(5); // Q5αは問い合わせ増やしたいを選んだ人のみ
+  list.push(6,7,8,9);
+  return list;
+}
+
+function startDiagnosis() {
   document.getElementById('hero-section').classList.add('hidden');
   document.getElementById('quiz-section').classList.remove('hidden');
   document.getElementById('loading-section').classList.add('hidden');
   document.getElementById('result-section').classList.add('hidden');
-  answers=new Array(questions.length).fill(null);
-  multiSelections=[];cur=0;
+  answers = {};
+  multiSelections = [];
+  cur = 0;
   window.scrollTo({top:0, behavior:'smooth'});
   renderQ();
 }
 
-function renderQ(){
-  const q=questions[cur];
-  document.getElementById('q-category').textContent=q.category;
-  document.getElementById('q-text').textContent=q.text;
-  document.getElementById('prog-step').textContent=`STEP ${cur+1} / ${questions.length}`;
-  const pct=Math.round((cur/questions.length)*100);
-  document.getElementById('prog-pct').textContent=pct+'%';
-  document.getElementById('prog-fill').style.width=pct+'%';
-  const mh=document.getElementById('multi-hint');
-  q.type==='multi'?mh.classList.remove('hidden'):mh.classList.add('hidden');
-  if(q.type==='multi') multiSelections=answers[cur]?[...answers[cur]]:[];
-  document.getElementById('back-btn').style.visibility=cur===0?'hidden':'visible';
-  const opts=document.getElementById('q-opts');
-  opts.innerHTML='';
-  const labels=['A','B','C','D','E','F'];
-  if(q.type==='url'){
-    // URL入力フィールド
-    const wrap=document.createElement('div');
-    wrap.style.cssText='display:flex;flex-direction:column;gap:8px;';
-    const input=document.createElement('input');
-    input.type='url';
-    input.placeholder='https://example.com';
-    input.value=answers[cur]||'';
-    input.style.cssText='border:2px solid var(--border);border-radius:8px;padding:14px 16px;font-size:15px;font-family:inherit;outline:none;width:100%;';
-    input.addEventListener('focus',()=>input.style.borderColor='var(--blue-dark)');
-    input.addEventListener('blur',()=>input.style.borderColor='var(--border)');
-    input.addEventListener('input',()=>{
-      answers[qIdx]=input.value||'';
-      document.getElementById('next-btn').classList.add('active');
-    });
-    const skip=document.createElement('button');
-    skip.textContent='スキップする';
-    skip.style.cssText='background:transparent;border:none;color:var(--gray);font-size:13px;cursor:pointer;padding:8px;font-family:inherit;';
-    skip.onclick=()=>{answers[qIdx]='';nextQ();};
+function renderQ() {
+  const indexes = getVisibleIndexes();
+  const qIdx = indexes[cur];
+  const q = questions[qIdx];
+  const total = indexes.length;
 
-    // URLがある場合はローディング演出
-    const analyzeNote=document.createElement('p');
-    analyzeNote.textContent='';
-    analyzeNote.style.cssText='font-size:12px;color:var(--gray);margin-top:4px;';
+  document.getElementById('q-category').textContent = q.category;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('prog-step').textContent = `STEP ${cur+1} / ${total}`;
+  const pct = Math.round((cur / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
 
+  const mh = document.getElementById('multi-hint');
+  q.type === 'multi' ? mh.classList.remove('hidden') : mh.classList.add('hidden');
+
+  if (q.type === 'multi') {
+    multiSelections = answers[qIdx] ? [...answers[qIdx]] : [];
+  }
+
+  document.getElementById('back-btn').style.visibility = cur === 0 ? 'hidden' : 'visible';
+
+  const opts = document.getElementById('q-opts');
+  opts.innerHTML = '';
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.classList.remove('active');
+
+  if (q.type === 'url') {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+    const input = document.createElement('input');
+    input.type = 'url';
+    input.placeholder = 'https://example.com';
+    input.value = answers[qIdx] || '';
+    input.style.cssText = 'border:2px solid var(--border);border-radius:8px;padding:14px 16px;font-size:15px;font-family:inherit;outline:none;width:100%;';
+    input.addEventListener('focus', () => input.style.borderColor = 'var(--blue-dark)');
+    input.addEventListener('blur', () => input.style.borderColor = 'var(--border)');
+    input.addEventListener('input', () => { answers[qIdx] = input.value || ''; });
+    const skip = document.createElement('button');
+    skip.textContent = 'スキップする';
+    skip.style.cssText = 'background:transparent;border:none;color:var(--gray);font-size:13px;cursor:pointer;padding:8px;font-family:inherit;';
+    skip.onclick = () => { answers[qIdx] = ''; nextQ(); };
     wrap.appendChild(input);
-    wrap.appendChild(analyzeNote);
     wrap.appendChild(skip);
     opts.appendChild(wrap);
-    document.getElementById('next-btn').classList.add('active');
-  } else {
-    q.options.forEach((opt,i)=>{
-      const btn=document.createElement('button');
-      btn.className='opt-btn';
-      if(q.type==='single'&&answers[cur]===i) btn.classList.add('selected');
-      if(q.type==='multi'&&multiSelections.includes(i)) btn.classList.add('selected');
-      btn.innerHTML=`<span class="opt-mark">${labels[i]}</span>${opt}`;
-      btn.onclick=()=>{
-        if(q.type==='single'){
-          answers[qIdx]=i;
-          if(q.id==='budget') selectedBudget=q.budgets[i];
-          document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
-          btn.classList.add('selected');
-          document.getElementById('next-btn').classList.add('active');
-        } else {
-          const idx=multiSelections.indexOf(i);
-          idx>-1?multiSelections.splice(idx,1):multiSelections.push(i);
-          btn.classList.toggle('selected');
-          answers[qIdx]=multiSelections.length>0?[...multiSelections]:null;
-          document.getElementById('next-btn').classList[multiSelections.length>0?'add':'remove']('active');
-        }
-      };
-      opts.appendChild(btn);
-    });
-    const hasAns=q.type==='multi'?multiSelections.length>0:answers[qIdx]!==null;
-    document.getElementById('next-btn').classList[hasAns?'add':'remove']('active');
+    nextBtn.classList.add('active');
+    return;
   }
-  document.getElementById('q-card').style.animation='none';
+
+  const labels = ['A','B','C','D','E','F','G','H'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    if (q.type === 'single' && answers[qIdx] === i) btn.classList.add('selected');
+    if (q.type === 'multi' && multiSelections.includes(i)) btn.classList.add('selected');
+    btn.innerHTML = `<span class="opt-mark">${labels[i]}</span>${opt}`;
+
+    btn.onclick = () => {
+      if (q.type === 'single') {
+        answers[qIdx] = i;
+        if (q.id === 'budget') selectedBudget = q.budgets[i];
+        document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        nextBtn.classList.add('active');
+      } else {
+        const idx = multiSelections.indexOf(i);
+        idx > -1 ? multiSelections.splice(idx, 1) : multiSelections.push(i);
+        btn.classList.toggle('selected');
+        answers[qIdx] = multiSelections.length > 0 ? [...multiSelections] : null;
+        nextBtn.classList[multiSelections.length > 0 ? 'add' : 'remove']('active');
+      }
+    };
+    opts.appendChild(btn);
+  });
+
+  // すでに回答済みなら次へボタンを点灯
+  if (q.type === 'multi') {
+    if (multiSelections.length > 0) nextBtn.classList.add('active');
+  } else {
+    if (answers[qIdx] !== undefined && answers[qIdx] !== null) nextBtn.classList.add('active');
+  }
+
+  document.getElementById('q-card').style.animation = 'none';
   void document.getElementById('q-card').offsetWidth;
-  document.getElementById('q-card').style.animation='fadeUp 0.4s ease both';
+  document.getElementById('q-card').style.animation = 'fadeUp 0.4s ease both';
 }
 
-function nextQ(){
-  const total=getTotalSteps();
-  if(cur<total-1){ cur++; renderQ(); }
+function nextQ() {
+  const total = getVisibleIndexes().length;
+  if (cur < total - 1) { cur++; renderQ(); }
   else { showLoading(); }
 }
-function prevQ(){ if(cur>0){cur--;renderQ();} }
 
-function showLoading(){
+function prevQ() {
+  if (cur > 0) { cur--; renderQ(); }
+}
+
+function goTop() {
+  document.getElementById('hero-section').classList.remove('hidden');
+  document.getElementById('quiz-section').classList.add('hidden');
+  document.getElementById('loading-section').classList.add('hidden');
+  document.getElementById('result-section').classList.add('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function showLoading() {
   document.getElementById('quiz-section').classList.add('hidden');
   document.getElementById('loading-section').classList.remove('hidden');
-  const urlIdx = questions.findIndex(q=>q.id==='url');
-  const hasUrl = answers[urlIdx] && answers[urlIdx].length > 0;
+  const hasUrl = answers[9] && answers[9].length > 0;
   const steps = hasUrl
     ? ['サイトを分析中…','業種プロファイルを確認','Web課題を特定','改善優先度を算出']
     : ['回答データを確認','業種プロファイルを確認','Web課題を特定','改善優先度を算出'];
-  ['ls1','ls2','ls3','ls4'].forEach((id,i)=>{
-    document.getElementById(id).querySelector('.step-dot').nextSibling.textContent = steps[i];
-    setTimeout(()=>{
-      document.getElementById(id).classList.add('show');
-      if(i>0) document.getElementById(['ls1','ls2','ls3','ls4'][i-1]).classList.add('done');
-    },i*800);
+  ['ls1','ls2','ls3','ls4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.querySelector('.step-dot').nextSibling.textContent = ' ' + steps[i];
+    setTimeout(() => {
+      el.classList.add('show');
+      if (i > 0) document.getElementById(['ls1','ls2','ls3','ls4'][i-1]).classList.add('done');
+    }, i * 800);
   });
   setTimeout(showResult, hasUrl ? 4000 : 3200);
 }
 
-function showResult(){
+function showResult() {
   document.getElementById('loading-section').classList.add('hidden');
   document.getElementById('result-section').classList.remove('hidden');
-  const industry=questions[0].options[answers[0]]||"士業";
-  const service=answers[1]!==null?questions[1].options[answers[1]]:'';
-  let score=0;
-  getVisibleQuestions().forEach(qi=>{
-    const ans=answers[qi];
-    if(Array.isArray(ans)) ans.forEach(i=>{ if(questions[qi].scores[i]) score+=questions[qi].scores[i]; });
-    else if(ans!==null && questions[qi].scores[ans]!==undefined) score+=questions[qi].scores[ans];
+
+  const industry = questions[0].options[answers[0]] || "士業";
+  let score = 0;
+  getVisibleIndexes().forEach(qi => {
+    const ans = answers[qi];
+    if (Array.isArray(ans)) {
+      ans.forEach(i => { if (questions[qi].scores[i] !== undefined) score += questions[qi].scores[i]; });
+    } else if (ans !== null && ans !== undefined && questions[qi].scores[ans] !== undefined) {
+      score += questions[qi].scores[ans];
+    }
   });
-  score=Math.min(100,score);
-  document.getElementById('res-title').textContent=`Webで${score>=70?'大きな':score>=50?'一定の':'基本的な'}改善余地があります`;
-  document.getElementById('res-sub').textContent='以下に課題の詳細と改善の方向性をまとめました';
-  // ランク判定（スコアが高い＝問題が多い）
+  score = Math.min(150, score);
+
+  document.getElementById('res-title').textContent = `Webで${score >= 80 ? '大きな' : score >= 50 ? '一定の' : '基本的な'}改善余地があります`;
+  document.getElementById('res-sub').textContent = '以下に課題の詳細と改善の方向性をまとめました';
+
+  // ランク判定
   let rank, rankLabel, rankComment;
-  if(score < 50){
-    rank='A'; rankLabel='Aランク（良好）';
-    rankComment='現状でも一定の評価はありますが、競合と比較された際に差がつきにくい状態です。さらなる改善で成果を伸ばせる可能性があります。';
-  } else if(score < 75){
-    rank='B'; rankLabel='Bランク（改善余地あり）';
-    rankComment='現状でも一定の評価はありますが、本来得られるはずの案件を逃している可能性があります。';
+  if (score < 50) {
+    rank = 'A'; rankLabel = 'Aランク（良好）';
+    rankComment = '現状でも一定の評価はありますが、競合と比較された際に差がつきにくい状態です。さらなる改善で成果を伸ばせる可能性があります。';
+  } else if (score < 90) {
+    rank = 'B'; rankLabel = 'Bランク（改善余地あり）';
+    rankComment = '現状でも一定の評価はありますが、本来得られるはずの案件を逃している可能性があります。';
   } else {
-    rank='C'; rankLabel='Cランク（要改善）';
-    rankComment='現状のままでは、機会損失が発生している可能性が高い状態です。早めの見直しをおすすめします。';
+    rank = 'C'; rankLabel = 'Cランク（要改善）';
+    rankComment = '現状のままでは、機会損失が発生している可能性が高い状態です。早めの見直しをおすすめします。';
   }
+
   const badge = document.getElementById('res-rank-badge');
   badge.textContent = rank;
   badge.className = 'rank-badge rank-' + rank.toLowerCase();
   document.getElementById('res-rank-label').textContent = rankLabel;
   document.getElementById('res-comment').textContent = rankComment;
-  const issueList=issueMap[industry]||defaultIssues;
-  document.getElementById('res-issues').innerHTML=issueList.map(issue=>`<div class="issue-item"><div class="issue-icon">${issue.icon}</div><div class="issue-text"><strong>${issue.title}</strong><p>${issue.desc}</p></div></div>`).join('');
-  let budgetRange='',budgetNote='';
-  if(!selectedBudget||selectedBudget==='要相談'){
-    budgetRange=score>=70?'30〜80万円':score>=50?'15〜40万円':'10〜25万円';
-    budgetNote='ご状況に合わせた最適なプランをご提案します。';
+
+  const issueList = issueMap[industry] || defaultIssues;
+  document.getElementById('res-issues').innerHTML = issueList.map(issue =>
+    `<div class="issue-item"><div class="issue-icon">${issue.icon}</div><div class="issue-text"><strong>${issue.title}</strong><p>${issue.desc}</p></div></div>`
+  ).join('');
+
+  let budgetRange = '', budgetNote = '';
+  if (!selectedBudget || selectedBudget === '要相談') {
+    budgetRange = score >= 90 ? '30〜80万円' : score >= 50 ? '15〜40万円' : '10〜25万円';
+    budgetNote = 'ご状況に合わせた最適なプランをご提案します。';
   } else {
-    budgetRange=selectedBudget;
-    budgetNote='ご予算に合わせた最適なプランをご提案します。まずはお気軽にご相談ください。';
+    budgetRange = selectedBudget;
+    budgetNote = 'ご予算に合わせた最適なプランをご提案します。まずはお気軽にご相談ください。';
   }
-  document.getElementById('res-budget').textContent=budgetRange;
-  document.getElementById('res-budget-note').textContent=budgetNote;
+  document.getElementById('res-budget').textContent = budgetRange;
+  document.getElementById('res-budget-note').textContent = budgetNote;
 }
 
-function submitContact(){
-  const email=document.getElementById('email-input').value;
-  if(!email||!email.includes('@')){alert('メールアドレスを正しく入力してください');return;}
-  document.getElementById('form-area').style.display='none';
+function submitContact() {
+  const email = document.getElementById('email-input').value;
+  if (!email || !email.includes('@')) { alert('メールアドレスを正しく入力してください'); return; }
+  document.getElementById('form-area').style.display = 'none';
   document.getElementById('thanks-msg').classList.add('show');
 }
 </script>
