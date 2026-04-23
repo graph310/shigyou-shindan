@@ -273,13 +273,20 @@
       padding-left: 10px;
       margin-bottom: 18px;
     }
-    .score-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
-    .score-label { font-size: 15px; font-weight: 700; color: var(--text); }
-    .score-value { font-size: 44px; font-weight: 900; color: var(--blue-dark); line-height: 1; }
-    .score-value span { font-size: 18px; color: var(--gray); }
-    .score-track { height: 8px; background: var(--blue-light); border-radius: 99px; margin-bottom: 12px; }
-    .score-fill { height: 8px; background: linear-gradient(90deg, var(--blue-dark), var(--blue-mid)); border-radius: 99px; transition: width 1s ease; }
-    .score-comment { font-size: 14px; color: var(--gray); line-height: 1.7; }
+    .rank-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .rank-badge {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 900;
+      flex-shrink: 0;
+      border: 3px solid;
+    }
+    .rank-badge.rank-a { background: #EEF7EE; color: #2E7D32; border-color: #2E7D32; }
+    .rank-badge.rank-b { background: #FFF8E1; color: #F57F17; border-color: #F57F17; }
+    .rank-badge.rank-c { background: #FFEBEE; color: #C62828; border-color: #C62828; }
+    .rank-label { font-size: 18px; font-weight: 900; color: var(--text); line-height: 1.4; }
+    .rank-comment { font-size: 14px; color: var(--gray); line-height: 1.8; }
 
     .issue-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--blue-light); }
     .issue-item:last-child { border-bottom: none; padding-bottom: 0; }
@@ -422,13 +429,12 @@
       <div class="result-sub" id="res-sub"></div>
     </div>
     <div class="card">
-      <div class="card-title">WEB改善ポテンシャル</div>
-      <div class="score-row">
-        <span class="score-label">総合スコア</span>
-        <div class="score-value" id="res-score">0<span>点</span></div>
+      <div class="card-title">WEB改善診断結果</div>
+      <div class="rank-row">
+        <div class="rank-badge" id="res-rank-badge"></div>
+        <div class="rank-label" id="res-rank-label"></div>
       </div>
-      <div class="score-track"><div class="score-fill" id="res-bar" style="width:0%"></div></div>
-      <div class="score-comment" id="res-comment"></div>
+      <div class="rank-comment" id="res-comment"></div>
     </div>
     <div class="card">
       <div class="card-title">課題・改善ポイント</div>
@@ -441,10 +447,10 @@
     </div>
     <div class="cta-card">
       <h3>診断結果の"具体的な改善案"を<br>メールでお送りします。</h3>
-      <p>メールアドレスをご入力ください。診断結果と具体的な改善提案をお送りします。</p>
+      <p>より具体的な改善ポイントと施策について、詳細レポートをメールでお送りします。</p>
       <div id="form-area">
         <input class="email-input" type="email" id="email-input" placeholder="メールアドレスを入力してください">
-        <button class="cta-btn" onclick="submitContact()">相談する（無料）</button>
+        <button class="cta-btn" onclick="submitContact()">改善案を受け取る（無料）</button>
         
       </div>
       <div class="thanks-msg" id="thanks-msg">
@@ -578,7 +584,7 @@ function renderQ(){
 
     // URLがある場合はローディング演出
     const analyzeNote=document.createElement('p');
-    analyzeNote.textContent='URLを入力するとサイトを分析中… の演出が表示されます';
+    analyzeNote.textContent='';
     analyzeNote.style.cssText='font-size:12px;color:var(--gray);margin-top:4px;';
 
     wrap.appendChild(input);
@@ -648,14 +654,25 @@ function showResult(){
     else if(ans!==null) score+=questions[qi].scores[ans];
   });
   score=Math.min(100,score);
-  document.getElementById('res-title').textContent=`${industry}として、Webで${score>=70?'大きな':score>=50?'一定の':'基本的な'}改善余地があります`;
+  document.getElementById('res-title').textContent=`Webで${score>=70?'大きな':score>=50?'一定の':'基本的な'}改善余地があります`;
   document.getElementById('res-sub').textContent='以下に課題の詳細と改善の方向性をまとめました';
-  setTimeout(()=>{
-    document.getElementById('res-score').innerHTML=`${score}<span>点</span>`;
-    document.getElementById('res-bar').style.width=score+'%';
-  },300);
-  const comment=score>=70?'改善ポテンシャルが高い状態です。適切なWeb整備により、問い合わせ数の大幅な増加が見込めます。':score>=50?'複数の課題が確認されます。優先度の高い改善から着手することで、効果的に集客力を高められます。':'基礎的な整備から始めることで、着実に問い合わせ増加につながります。';
-  document.getElementById('res-comment').textContent=comment;
+  // ランク判定（スコアが高い＝問題が多い）
+  let rank, rankLabel, rankComment;
+  if(score < 50){
+    rank='A'; rankLabel='Aランク（良好）';
+    rankComment='現状でも一定の評価はありますが、競合と比較された際に差がつきにくい状態です。さらなる改善で成果を伸ばせる可能性があります。';
+  } else if(score < 75){
+    rank='B'; rankLabel='Bランク（改善余地あり）';
+    rankComment='現状でも一定の評価はありますが、本来得られるはずの案件を逃している可能性があります。';
+  } else {
+    rank='C'; rankLabel='Cランク（要改善）';
+    rankComment='現状のままでは、機会損失が発生している可能性が高い状態です。早めの見直しをおすすめします。';
+  }
+  const badge = document.getElementById('res-rank-badge');
+  badge.textContent = rank;
+  badge.className = 'rank-badge rank-' + rank.toLowerCase();
+  document.getElementById('res-rank-label').textContent = rankLabel;
+  document.getElementById('res-comment').textContent = rankComment;
   const issueList=issueMap[industry]||defaultIssues;
   document.getElementById('res-issues').innerHTML=issueList.map(issue=>`<div class="issue-item"><div class="issue-icon">${issue.icon}</div><div class="issue-text"><strong>${issue.title}</strong><p>${issue.desc}</p></div></div>`).join('');
   let budgetRange='',budgetNote='';
