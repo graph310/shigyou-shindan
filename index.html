@@ -291,12 +291,11 @@
     .issue-item { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--blue-light); }
     .issue-item:last-child { border-bottom: none; padding-bottom: 0; }
     .issue-icon {
-      width: 48px; height: 48px;
+      width: 80px; height: 80px;
       border-radius: 8px;
-      background: var(--blue-light);
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
     }
+    .issue-icon img { width: 80px; height: 80px; object-fit: contain; }
     .issue-text { text-align: center; } .issue-text strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
     .issue-text p { font-size: 13px; color: var(--gray); line-height: 1.6; }
 
@@ -805,8 +804,9 @@ function showResult() {
       const def = pointDefs[p];
       if (!def) return '';
       const label = idx === 0 ? '最優先' : idx === 1 ? '優先' : '補完';
+      const imgNum = idx + 1;
       return `<div class="issue-item">
-        <div class="issue-icon">${def.icon}</div>
+        <div class="issue-icon"><img src="img/${imgNum}.png" alt="${label}"></div>
         <div class="issue-text">
           <span style="font-size:11px;color:var(--blue-mid);font-weight:700;display:block;margin-bottom:3px;">${label}</span>
           <strong>${def.title}</strong>
