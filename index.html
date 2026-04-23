@@ -440,12 +440,12 @@
       <div class="budget-note" id="res-budget-note"></div>
     </div>
     <div class="cta-card">
-      <h3>まずは無料でご相談ください</h3>
-      <p>診断結果をもとに、貴事務所に合った改善プランをご提案します。返信は24時間以内。費用は一切かかりません。</p>
+      <h3>診断結果の"具体的な改善案"を<br>メールでお送りします。</h3>
+      <p>メールアドレスをご入力ください。診断結果と具体的な改善提案をお送りします。</p>
       <div id="form-area">
         <input class="email-input" type="email" id="email-input" placeholder="メールアドレスを入力してください">
         <button class="cta-btn" onclick="submitContact()">相談する（無料）</button>
-        <p class="cta-note">送信後、Graph 310°よりご連絡いたします。</p>
+        
       </div>
       <div class="thanks-msg" id="thanks-msg">
         <h4>ありがとうございます</h4>
@@ -468,11 +468,56 @@ function goTop(){
 }
 
 const questions = [
-  { category:"BASIC INFO", text:"事務所の業種をお聞かせください", type:"single", options:["税理士・会計士","社会保険労務士","行政書士","司法書士","弁護士","その他士業"], scores:[10,10,10,10,10,8] },
-  { category:"CURRENT STATUS", text:"現在のWebサイトの状況は？", type:"single", options:["5年以上更新していない","2〜5年前に制作したが更新少ない","比較的新しいが問い合わせが来ない","サイト自体がない"], scores:[20,15,12,25] },
-  { category:"ISSUES", text:"現在感じているWeb上の課題を選んでください", type:"multi", options:["問い合わせがほとんど来ない","他事務所との差別化ができていない","サービス内容が伝わりにくい","スマホで見づらい","更新・管理が難しい","検索で上位に出てこない"], scores:[8,7,8,6,5,7] },
-  { category:"TARGET", text:"特に強化したい集客・案件の種類は？", type:"single", options:["相続・資産承継","助成金・労務相談","外国人ビザ・許認可","一般的な顧問契約","スポット相談・セミナー","特になし"], scores:[15,12,12,10,8,5] },
-  { category:"BUDGET", text:"Web改善への投資予算感をお聞かせください", type:"single", options:["〜10万円","10〜30万円","30〜50万円","50万円以上","まずは相談してから決めたい"], scores:[5,10,15,20,12], budgets:["〜10万円","10〜30万円","30〜50万円","50万円〜","要相談"] }
+  {
+    category:"BASIC INFO",
+    text:"事務所の業種をお聞かせください",
+    type:"single",
+    options:["税理士・会計士","社会保険労務士","行政書士","司法書士","弁護士","その他士業"],
+    scores:[10,10,10,10,10,8]
+  },
+  {
+    category:"CURRENT STATUS",
+    text:"現在のWebサイトの状況は？",
+    type:"single",
+    options:["5年以上更新していない","2〜5年前に制作したが更新少ない","比較的新しいが問い合わせが来ない","サイト自体がない"],
+    scores:[20,15,12,25]
+  },
+  {
+    category:"ISSUES",
+    text:"現在感じているWeb上の課題を選んでください",
+    type:"multi",
+    options:["問い合わせがほとんど来ない","他事務所との差別化ができていない","サービス内容が伝わりにくい","スマホで見づらい","更新・管理が難しい","検索で上位に出てこない"],
+    scores:[8,7,8,6,5,7]
+  },
+  {
+    category:"IMPROVEMENT",
+    text:"今回、最も改善したいのは？",
+    type:"single",
+    options:["問い合わせを増やしたい","採用を強化したい","営業資料・展示会","なんとなく改善したい"],
+    scores:[15,12,10,5]
+  },
+  {
+    category:"AUTHORITY",
+    text:"Webサイト改善の決定権について教えてください",
+    type:"single",
+    options:["自分で決定できる","提案はできる","関与していない"],
+    scores:[20,10,2]
+  },
+  {
+    category:"BUDGET",
+    text:"Web改善への投資予算感をお聞かせください",
+    type:"single",
+    options:["〜10万円","10〜30万円","30〜50万円","50万円以上","まずは相談してから決めたい"],
+    scores:[5,10,15,20,12],
+    budgets:["〜10万円","10〜30万円","30〜50万円","50万円〜","要相談"]
+  },
+  {
+    category:"URL",
+    text:"診断精度を高めるため、WebサイトURLをご入力ください（任意）",
+    type:"url",
+    options:[],
+    scores:[]
+  }
 ];
 
 const issueMap = {
@@ -511,31 +556,63 @@ function renderQ(){
   const opts=document.getElementById('q-opts');
   opts.innerHTML='';
   const labels=['A','B','C','D','E','F'];
-  q.options.forEach((opt,i)=>{
-    const btn=document.createElement('button');
-    btn.className='opt-btn';
-    if(q.type==='single'&&answers[cur]===i) btn.classList.add('selected');
-    if(q.type==='multi'&&multiSelections.includes(i)) btn.classList.add('selected');
-    btn.innerHTML=`<span class="opt-mark">${labels[i]}</span>${opt}`;
-    btn.onclick=()=>{
-      if(q.type==='single'){
-        answers[cur]=i;
-        if(cur===questions.length-1) selectedBudget=q.budgets[i];
-        document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
-        btn.classList.add('selected');
-        document.getElementById('next-btn').classList.add('active');
-      } else {
-        const idx=multiSelections.indexOf(i);
-        idx>-1?multiSelections.splice(idx,1):multiSelections.push(i);
-        btn.classList.toggle('selected');
-        answers[cur]=multiSelections.length>0?[...multiSelections]:null;
-        document.getElementById('next-btn').classList[multiSelections.length>0?'add':'remove']('active');
-      }
-    };
-    opts.appendChild(btn);
-  });
-  const hasAns=q.type==='multi'?multiSelections.length>0:answers[cur]!==null;
-  document.getElementById('next-btn').classList[hasAns?'add':'remove']('active');
+  if(q.type==='url'){
+    // URL入力フィールド
+    const wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;gap:8px;';
+    const input=document.createElement('input');
+    input.type='url';
+    input.placeholder='https://example.com';
+    input.value=answers[cur]||'';
+    input.style.cssText='border:2px solid var(--border);border-radius:8px;padding:14px 16px;font-size:15px;font-family:inherit;outline:none;width:100%;';
+    input.addEventListener('focus',()=>input.style.borderColor='var(--blue-dark)');
+    input.addEventListener('blur',()=>input.style.borderColor='var(--border)');
+    input.addEventListener('input',()=>{
+      answers[cur]=input.value||'';
+      document.getElementById('next-btn').classList.add('active');
+    });
+    const skip=document.createElement('button');
+    skip.textContent='スキップする';
+    skip.style.cssText='background:transparent;border:none;color:var(--gray);font-size:13px;cursor:pointer;padding:8px;font-family:inherit;';
+    skip.onclick=()=>{answers[cur]='';nextQ();};
+
+    // URLがある場合はローディング演出
+    const analyzeNote=document.createElement('p');
+    analyzeNote.textContent='URLを入力するとサイトを分析中… の演出が表示されます';
+    analyzeNote.style.cssText='font-size:12px;color:var(--gray);margin-top:4px;';
+
+    wrap.appendChild(input);
+    wrap.appendChild(analyzeNote);
+    wrap.appendChild(skip);
+    opts.appendChild(wrap);
+    document.getElementById('next-btn').classList.add('active');
+  } else {
+    q.options.forEach((opt,i)=>{
+      const btn=document.createElement('button');
+      btn.className='opt-btn';
+      if(q.type==='single'&&answers[cur]===i) btn.classList.add('selected');
+      if(q.type==='multi'&&multiSelections.includes(i)) btn.classList.add('selected');
+      btn.innerHTML=`<span class="opt-mark">${labels[i]}</span>${opt}`;
+      btn.onclick=()=>{
+        if(q.type==='single'){
+          answers[cur]=i;
+          if(cur===5) selectedBudget=questions[5].budgets[i];
+          document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+          btn.classList.add('selected');
+          document.getElementById('next-btn').classList.add('active');
+        } else {
+          const idx=multiSelections.indexOf(i);
+          idx>-1?multiSelections.splice(idx,1):multiSelections.push(i);
+          btn.classList.toggle('selected');
+          answers[cur]=multiSelections.length>0?[...multiSelections]:null;
+          document.getElementById('next-btn').classList[multiSelections.length>0?'add':'remove']('active');
+        }
+      };
+      opts.appendChild(btn);
+    });
+    const hasAns=q.type==='multi'?multiSelections.length>0:answers[cur]!==null;
+    document.getElementById('next-btn').classList[hasAns?'add':'remove']('active');
+  }
   document.getElementById('q-card').style.animation='none';
   void document.getElementById('q-card').offsetWidth;
   document.getElementById('q-card').style.animation='fadeUp 0.4s ease both';
@@ -547,13 +624,18 @@ function prevQ(){ if(cur>0){cur--;renderQ();} }
 function showLoading(){
   document.getElementById('quiz-section').classList.add('hidden');
   document.getElementById('loading-section').classList.remove('hidden');
+  const hasUrl = answers[6] && answers[6].length > 0;
+  const steps = hasUrl
+    ? ['サイトを分析中…','業種プロファイルを確認','Web課題を特定','改善優先度を算出']
+    : ['回答データを確認','業種プロファイルを確認','Web課題を特定','改善優先度を算出'];
   ['ls1','ls2','ls3','ls4'].forEach((id,i)=>{
+    document.getElementById(id).querySelector('.step-dot').nextSibling.textContent = steps[i];
     setTimeout(()=>{
       document.getElementById(id).classList.add('show');
       if(i>0) document.getElementById(['ls1','ls2','ls3','ls4'][i-1]).classList.add('done');
-    },i*700);
+    },i*800);
   });
-  setTimeout(showResult,3200);
+  setTimeout(showResult, hasUrl ? 4000 : 3200);
 }
 
 function showResult(){
