@@ -607,13 +607,13 @@ function renderQ(){
     input.addEventListener('focus',()=>input.style.borderColor='var(--blue-dark)');
     input.addEventListener('blur',()=>input.style.borderColor='var(--border)');
     input.addEventListener('input',()=>{
-      answers[cur]=input.value||'';
+      answers[qIdx]=input.value||'';
       document.getElementById('next-btn').classList.add('active');
     });
     const skip=document.createElement('button');
     skip.textContent='スキップする';
     skip.style.cssText='background:transparent;border:none;color:var(--gray);font-size:13px;cursor:pointer;padding:8px;font-family:inherit;';
-    skip.onclick=()=>{answers[cur]='';nextQ();};
+    skip.onclick=()=>{answers[qIdx]='';nextQ();};
 
     // URLがある場合はローディング演出
     const analyzeNote=document.createElement('p');
@@ -634,8 +634,8 @@ function renderQ(){
       btn.innerHTML=`<span class="opt-mark">${labels[i]}</span>${opt}`;
       btn.onclick=()=>{
         if(q.type==='single'){
-          answers[cur]=i;
-          if(cur===5) selectedBudget=questions[5].budgets[i];
+          answers[qIdx]=i;
+          if(q.id==='budget') selectedBudget=q.budgets[i];
           document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
           btn.classList.add('selected');
           document.getElementById('next-btn').classList.add('active');
@@ -643,13 +643,13 @@ function renderQ(){
           const idx=multiSelections.indexOf(i);
           idx>-1?multiSelections.splice(idx,1):multiSelections.push(i);
           btn.classList.toggle('selected');
-          answers[cur]=multiSelections.length>0?[...multiSelections]:null;
+          answers[qIdx]=multiSelections.length>0?[...multiSelections]:null;
           document.getElementById('next-btn').classList[multiSelections.length>0?'add':'remove']('active');
         }
       };
       opts.appendChild(btn);
     });
-    const hasAns=q.type==='multi'?multiSelections.length>0:answers[cur]!==null;
+    const hasAns=q.type==='multi'?multiSelections.length>0:answers[qIdx]!==null;
     document.getElementById('next-btn').classList[hasAns?'add':'remove']('active');
   }
   document.getElementById('q-card').style.animation='none';
@@ -657,13 +657,18 @@ function renderQ(){
   document.getElementById('q-card').style.animation='fadeUp 0.4s ease both';
 }
 
-function nextQ(){ cur<questions.length-1?(cur++,renderQ()):showLoading(); }
+function nextQ(){
+  const total=getTotalSteps();
+  if(cur<total-1){ cur++; renderQ(); }
+  else { showLoading(); }
+}
 function prevQ(){ if(cur>0){cur--;renderQ();} }
 
 function showLoading(){
   document.getElementById('quiz-section').classList.add('hidden');
   document.getElementById('loading-section').classList.remove('hidden');
-  const hasUrl = answers[6] && answers[6].length > 0;
+  const urlIdx = questions.findIndex(q=>q.id==='url');
+  const hasUrl = answers[urlIdx] && answers[urlIdx].length > 0;
   const steps = hasUrl
     ? ['サイトを分析中…','業種プロファイルを確認','Web課題を特定','改善優先度を算出']
     : ['回答データを確認','業種プロファイルを確認','Web課題を特定','改善優先度を算出'];
@@ -681,10 +686,12 @@ function showResult(){
   document.getElementById('loading-section').classList.add('hidden');
   document.getElementById('result-section').classList.remove('hidden');
   const industry=questions[0].options[answers[0]]||"士業";
+  const service=answers[1]!==null?questions[1].options[answers[1]]:'';
   let score=0;
-  answers.forEach((ans,qi)=>{
-    if(Array.isArray(ans)) ans.forEach(i=>score+=questions[qi].scores[i]);
-    else if(ans!==null) score+=questions[qi].scores[ans];
+  getVisibleQuestions().forEach(qi=>{
+    const ans=answers[qi];
+    if(Array.isArray(ans)) ans.forEach(i=>{ if(questions[qi].scores[i]) score+=questions[qi].scores[i]; });
+    else if(ans!==null && questions[qi].scores[ans]!==undefined) score+=questions[qi].scores[ans];
   });
   score=Math.min(100,score);
   document.getElementById('res-title').textContent=`Webで${score>=70?'大きな':score>=50?'一定の':'基本的な'}改善余地があります`;
