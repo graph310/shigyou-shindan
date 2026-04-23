@@ -549,13 +549,40 @@ const questions = [
   }
 ];
 
-const issueMap = {
-  "税務・会計系":[{icon:"📋",title:"相続・資産承継LPの不在",desc:"単価の高い相続案件を取りこぼしている可能性があります。専門LPで差別化を。"},{icon:"🤝",title:"信頼感の設計不足",desc:"実績・資格・人柄が伝わるデザインで、問い合わせ前の不安を取り除きます。"},{icon:"📱",title:"スマホ対応・UI改善",desc:"スマホから検索する層へのアプローチが不十分な場合が多い業種です。"}],
-  "労務・人事系":[{icon:"💡",title:"助成金情報の打ち出し不足",desc:"助成金・補助金に関する情報が埋もれています。専用LPで問い合わせを増やせます。"},{icon:"⚡",title:"問い合わせ導線の弱さ",desc:"相談フォームや電話番号の配置が最適化されていないケースが多いです。"},{icon:"📊",title:"実績・事例の見せ方",desc:"支援実績を視覚化することで、信頼性が大きく向上します。"}],
-  "許認可・手続き系":[{icon:"🌍",title:"多言語対応の必要性",desc:"外国人ビザ・許認可案件は、やさしい日本語や多言語対応が差別化につながります。"},{icon:"🎯",title:"専門分野の明確化",desc:"「何でもできる」より「これが得意」を明示する方が選ばれやすいです。"},{icon:"🔒",title:"安心感・親しみやすさの設計",desc:"敷居の高さを感じさせないUI・コピーで問い合わせハードルを下げます。"}]
+// Q4の各選択肢 → 改善ポイントの主副・重みマッピング
+const q4IssueMap = [
+  { main:'P1', mainW:10, sub:'P2', subW:8 },  // 問い合わせが来ない
+  { main:'P3', mainW:9,  sub:'P2', subW:8 },  // 差別化できない
+  { main:'P2', mainW:9,  sub:'P4', subW:7 },  // 強みが伝わらない
+  { main:'P5', mainW:8,  sub:'P4', subW:7 },  // デザインが古い
+  { main:'P6', mainW:7,  sub:'P1', subW:6 },  // スマホで見づらい
+  { main:'P7', mainW:6,  sub:'P2', subW:6 },  // 検索で上位に出ない
+  { main:'P8', mainW:6,  sub:'P5', subW:5 },  // 更新・管理が手間
+  { main:'P9', mainW:9,  sub:'P4', subW:7 },  // どこを改善すればいいかわからない
+];
+
+// 改善ポイントの詳細定義
+const pointDefs = {
+  P1: { title:'問い合わせ導線の設計', icon:'⚡', desc:'CTAの配置・文言・フォームの使いやすさなど、問い合わせにつながる導線を整備します。' },
+  P2: { title:'強み訴求の設計', icon:'🎯', desc:'サービスの価値や特徴が伝わるコピーとビジュアルで、「ここに頼みたい」を設計します。' },
+  P3: { title:'差別化設計', icon:'✨', desc:'他事務所との違いを明確にし、選ばれる理由をページ上で可視化します。' },
+  P4: { title:'信頼感の設計', icon:'🤝', desc:'実績・事例・プロフィールなど信頼要素を整理し、問い合わせ前の不安を取り除きます。' },
+  P5: { title:'デザイン刷新', icon:'🎨', desc:'第一印象を改善し、信頼感と視認性を高めるデザインにアップデートします。' },
+  P6: { title:'スマホ最適化', icon:'📱', desc:'モバイルでの閲覧・操作性を改善し、離脱を防いで問い合わせにつなげます。' },
+  P7: { title:'SEO基礎改善', icon:'🔍', desc:'検索流入を増やすための基礎的なSEO設計とコンテンツ整備をサポートします。' },
+  P8: { title:'更新しやすい構造への改善', icon:'🔧', desc:'放置されにくい、管理しやすいサイト構造に見直します。' },
+  P9: { title:'情報設計の整理', icon:'📋', desc:'何をどう直せばいいか不明な状態を整理し、優先順位を明確にした改善プランを提示します。' },
+  P10: { title:'集客導線の再設計', icon:'📊', desc:'問い合わせの質・安定性を高めるため、ターゲットに合った導線を再構築します。' },
 };
 
-const defaultIssues=[{icon:"🎯",title:"専門性の可視化",desc:"得意分野・専門領域を前面に出し、「この人に頼みたい」を設計します。"},{icon:"📱",title:"モバイル対応・UI改善",desc:"スマホからの検索・閲覧に最適化されたUI設計が重要です。"},{icon:"⚡",title:"問い合わせ導線の整備",desc:"見込み客が迷わず相談できる導線設計で、機会損失を防ぎます。"}];
+// Q3サイト状況 → 3つ目の補完ポイント
+const q3Supplement = [
+  'P1', // サイトがない → まず導線設計
+  'P5', // 5年以上更新なし → デザイン刷新
+  'P5', // 2〜5年放置 → デザイン刷新
+  'P1', // 最近作ったが反応なし → 導線改善
+  'P3', // 安定してる → 差別化でさらに伸ばす
+];
 
 let cur = 0;
 let answers = {};
@@ -564,7 +591,7 @@ let selectedBudget = "";
 
 function getVisibleIndexes() {
   const list = [0,1,2,3,4];
-  if (answers[4] === 0) list.push(5); // Q5αは問い合わせ増やしたいを選んだ人のみ
+  if (answers[4] === 0) list.push(5);
   list.push(6,7,8,9);
   return list;
 }
@@ -596,10 +623,7 @@ function renderQ() {
 
   const mh = document.getElementById('multi-hint');
   q.type === 'multi' ? mh.classList.remove('hidden') : mh.classList.add('hidden');
-
-  if (q.type === 'multi') {
-    multiSelections = answers[qIdx] ? [...answers[qIdx]] : [];
-  }
+  if (q.type === 'multi') multiSelections = answers[qIdx] ? [...answers[qIdx]] : [];
 
   document.getElementById('back-btn').style.visibility = cur === 0 ? 'hidden' : 'visible';
 
@@ -637,7 +661,6 @@ function renderQ() {
     if (q.type === 'single' && answers[qIdx] === i) btn.classList.add('selected');
     if (q.type === 'multi' && multiSelections.includes(i)) btn.classList.add('selected');
     btn.innerHTML = `<span class="opt-mark">${labels[i]}</span>${opt}`;
-
     btn.onclick = () => {
       if (q.type === 'single') {
         answers[qIdx] = i;
@@ -656,7 +679,6 @@ function renderQ() {
     opts.appendChild(btn);
   });
 
-  // すでに回答済みなら次へボタンを点灯
   if (q.type === 'multi') {
     if (multiSelections.length > 0) nextBtn.classList.add('active');
   } else {
@@ -704,11 +726,41 @@ function showLoading() {
   setTimeout(showResult, hasUrl ? 4000 : 3200);
 }
 
+function calcImprovements() {
+  // Q4の選択肢から改善ポイントの重みを集計
+  const selectedIssues = answers[3]; // Q4はindex3
+  const pointScores = {};
+
+  if (Array.isArray(selectedIssues)) {
+    selectedIssues.forEach(i => {
+      const mapping = q4IssueMap[i];
+      if (!mapping) return;
+      pointScores[mapping.main] = (pointScores[mapping.main] || 0) + mapping.mainW;
+      pointScores[mapping.sub]  = (pointScores[mapping.sub]  || 0) + mapping.subW;
+    });
+  }
+
+  // 重み順にソート
+  const sorted = Object.entries(pointScores).sort((a,b) => b[1]-a[1]);
+  const top2 = sorted.slice(0,2).map(e => e[0]);
+
+  // 3つ目はQ3から補完
+  const q3Ans = answers[2]; // Q3はindex2
+  let third = q3Supplement[q3Ans] || 'P1';
+  // top2と重複しないように
+  if (top2.includes(third)) {
+    const candidates = ['P1','P2','P3','P4','P5'].filter(p => !top2.includes(p));
+    third = candidates[0] || 'P4';
+  }
+
+  return [...top2, third];
+}
+
 function showResult() {
   document.getElementById('loading-section').classList.add('hidden');
   document.getElementById('result-section').classList.remove('hidden');
 
-  const industry = questions[0].options[answers[0]] || "士業";
+  // スコア計算
   let score = 0;
   getVisibleIndexes().forEach(qi => {
     const ans = answers[qi];
@@ -719,9 +771,6 @@ function showResult() {
     }
   });
   score = Math.min(150, score);
-
-  document.getElementById('res-title').textContent = `Webで${score >= 80 ? '大きな' : score >= 50 ? '一定の' : '基本的な'}改善余地があります`;
-  document.getElementById('res-sub').textContent = '以下に課題の詳細と改善の方向性をまとめました';
 
   // ランク判定
   let rank, rankLabel, rankComment;
@@ -742,11 +791,35 @@ function showResult() {
   document.getElementById('res-rank-label').textContent = rankLabel;
   document.getElementById('res-comment').textContent = rankComment;
 
-  const issueList = issueMap[industry] || defaultIssues;
-  document.getElementById('res-issues').innerHTML = issueList.map(issue =>
-    `<div class="issue-item"><div class="issue-icon">${issue.icon}</div><div class="issue-text"><strong>${issue.title}</strong><p>${issue.desc}</p></div></div>`
-  ).join('');
+  document.getElementById('res-title').textContent = `Webで${score >= 90 ? '大きな' : score >= 50 ? '一定の' : '基本的な'}改善余地があります`;
+  document.getElementById('res-sub').textContent = '以下に課題の詳細と改善の方向性をまとめました';
 
+  // 改善ポイント表示（Q4ベース＋Q3補完）
+  const improvements = calcImprovements();
+  const issuesEl = document.getElementById('res-issues');
+  if (improvements.length > 0 && improvements.some(p => pointDefs[p])) {
+    issuesEl.innerHTML = improvements.map((p, idx) => {
+      const def = pointDefs[p];
+      if (!def) return '';
+      const label = idx === 0 ? '最優先' : idx === 1 ? '優先' : '補完';
+      return `<div class="issue-item">
+        <div class="issue-icon">${def.icon}</div>
+        <div class="issue-text">
+          <strong>${def.title} <span style="font-size:11px;color:var(--blue-mid);font-weight:500;">${label}</span></strong>
+          <p>${def.desc}</p>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    // Q4未選択のデフォルト
+    issuesEl.innerHTML = [
+      {icon:'🎯',title:'強み訴求の設計',desc:'サービスの価値や特徴が伝わるコピーとビジュアルで、「ここに頼みたい」を設計します。'},
+      {icon:'⚡',title:'問い合わせ導線の設計',desc:'CTAの配置・文言・フォームの使いやすさなど、問い合わせにつながる導線を整備します。'},
+      {icon:'✨',title:'差別化設計',desc:'他事務所との違いを明確にし、選ばれる理由をページ上で可視化します。'}
+    ].map(i => `<div class="issue-item"><div class="issue-icon">${i.icon}</div><div class="issue-text"><strong>${i.title}</strong><p>${i.desc}</p></div></div>`).join('');
+  }
+
+  // 予算表示
   let budgetRange = '', budgetNote = '';
   if (!selectedBudget || selectedBudget === '要相談') {
     budgetRange = score >= 90 ? '30〜80万円' : score >= 50 ? '15〜40万円' : '10〜25万円';
