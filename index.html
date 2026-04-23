@@ -590,8 +590,11 @@ let multiSelections = [];
 let selectedBudget = "";
 
 function getVisibleIndexes() {
-  const list = [0,1,2,3,4];
-  if (answers[4] === 0) list.push(5);
+  const list = [0,1,2];
+  // Q3で「Webサイトがない」(index=0)を選んだらQ4をスキップ
+  if (answers[2] !== 0) list.push(3);
+  list.push(4);
+  if (answers[4] === 0) list.push(5); // Q5αは問い合わせ増やしたいを選んだ人のみ
   list.push(6,7,8,9);
   return list;
 }
@@ -805,7 +808,8 @@ function showResult() {
       return `<div class="issue-item">
         <div class="issue-icon">${def.icon}</div>
         <div class="issue-text">
-          <strong>${def.title} <span style="font-size:11px;color:var(--blue-mid);font-weight:500;">${label}</span></strong>
+          <span style="font-size:11px;color:var(--blue-mid);font-weight:700;display:block;margin-bottom:3px;">${label}</span>
+          <strong>${def.title}</strong>
           <p>${def.desc}</p>
         </div>
       </div>`;
