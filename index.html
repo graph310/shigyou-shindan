@@ -799,7 +799,7 @@ function showResult() {
     issuesEl.innerHTML = improvements.map((p, idx) => {
       const def = pointDefs[p];
       if (!def) return '';
-      const label = idx === 0 ? '最優先' : idx === 1 ? '優先' : '補完';
+      const label = idx === 0 ? 'Step1' : idx === 1 ? 'Step2' : 'Step3';
       return `<div class="issue-item">
         <div class="issue-icon"><img src="${def.img}" alt="${def.title}"></div>
         <div class="issue-text">
@@ -831,11 +831,80 @@ function showResult() {
   document.getElementById('res-budget-note').textContent = budgetNote;
 }
 
-function submitContact() {
+async function submitContact() {
   const email = document.getElementById('email-input').value;
   if (!email || !email.includes('@')) { alert('メールアドレスを正しく入力してください'); return; }
-  document.getElementById('form-area').style.display = 'none';
-  document.getElementById('thanks-msg').classList.add('show');
+
+  // 回答データを整理
+  const industry = questions[0].options[answers[0]] || '未回答';
+  const service = answers[1] !== undefined ? questions[1].options[answers[1]] : '未回答';
+  const status = answers[2] !== undefined ? questions[2].options[answers[2]] : '未回答';
+  const issues = Array.isArray(answers[3]) ? answers[3].map(i => questions[3].options[i]).join('、') : '未回答';
+  const goal = answers[4] !== undefined ? questions[4].options[answers[4]] : '未回答';
+  const authority = answers[6] !== undefined ? questions[6].options[answers[6]] : '未回答';
+  const timing = answers[7] !== undefined ? questions[7].options[answers[7]] : '未回答';
+  const budget = answers[8] !== undefined ? questions[8].options[answers[8]] : '未回答';
+  const url = answers[9] || 'なし';
+
+  // 改善ポイント取得
+  const improvements = calcImprovements();
+  const improvementText = improvements.map((p, i) => {
+    const def = pointDefs[p];
+    const label = i === 0 ? 'Step1' : i === 1 ? 'Step2' : 'Step3';
+    return def ? `${label}：${def.title}` : '';
+  }).join('
+');
+
+  // スコアとランク
+  let score = 0;
+  getVisibleIndexes().forEach(qi => {
+    const ans = answers[qi];
+    if (Array.isArray(ans)) ans.forEach(i => { if (questions[qi].scores[i] !== undefined) score += questions[qi].scores[i]; });
+    else if (ans !== null && ans !== undefined && questions[qi].scores[ans] !== undefined) score += questions[qi].scores[ans];
+  });
+  score = Math.min(150, score);
+  const rank = score < 50 ? 'Aランク（良好）' : score < 90 ? 'Bランク（改善余地あり）' : 'Cランク（要改善）';
+
+  const messageBody = `
+【士業向けWeb課題診断 回答内容】
+
+■ メールアドレス：${email}
+■ 診断ランク：${rank}
+
+■ Q1 業種：${industry}
+■ Q2 サービス：${service}
+■ Q3 サイト状況：${status}
+■ Q4 現在の課題：${issues}
+■ Q5 改善目標：${goal}
+■ Q6 立場・権限：${authority}
+■ Q7 検討時期：${timing}
+■ Q8 予算感：${budget}
+■ WebサイトURL：${url}
+
+■ 改善ポイント：
+${improvementText}
+  `.trim();
+
+  try {
+    const res = await fetch('https://formspree.io/f/xbdwdaba', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        message: messageBody,
+        _subject: `【士業診断】${industry}・${rank} - ${email}`
+      })
+    });
+
+    if (res.ok) {
+      document.getElementById('form-area').style.display = 'none';
+      document.getElementById('thanks-msg').classList.add('show');
+    } else {
+      alert('送信に失敗しました。もう一度お試しください。');
+    }
+  } catch(e) {
+    alert('送信に失敗しました。もう一度お試しください。');
+  }
 }
 </script>
 </body>
