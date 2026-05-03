@@ -297,6 +297,7 @@
     }
     .issue-icon img { width: 160px; height: 160px; object-fit: contain; }
     .issue-text { text-align: center; } .issue-text strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; } .issue-text p { text-align: left; font-size: 14px; line-height: 1.5; color: var(--gray); }
+    .blur-label { font-size: 14px; line-height: 1.5; color: var(--gray); text-align: left; margin-top: 4px; }
     .blur-text { filter: blur(4px); user-select: none; pointer-events: none; }
     .blur-text.revealed { filter: none; user-select: auto; pointer-events: auto; }
 
@@ -808,7 +809,8 @@ function showResult() {
           <span style="font-size:11px;color:var(--blue-mid);font-weight:700;display:block;margin-bottom:3px;">${label}</span>
           <strong>${def.title}</strong>
           <p>${def.desc}</p>
-          <p class="blur-text">${def.blur}</p>
+          <p class="blur-label">具体的な対策としては…</p>
+          <p class="blur-text">${def.blur.replace("具体的な対策としては、", "")}</p>
         </div>
       </div>`;
     }).join('');
