@@ -456,6 +456,17 @@
         <p>診断結果とともに、24時間以内にご連絡いたします。<br>しばらくお待ちください。</p>
       </div>
     </div>
+    <button class="btn-retry-bottom" onclick="startDiagnosis()">もう一度診断する</button>
+  </section>
+
+  <!-- THANKS PAGE -->
+  <section class="hidden" id="thanks-section">
+    <div class="thanks-page">
+      <div class="thanks-icon">✉️</div>
+      <h2>ありがとうございます</h2>
+      <p>診断結果とともに、<br>24時間以内にご連絡いたします。<br>しばらくお待ちください。</p>
+      <button class="btn-retry-bottom" onclick="startDiagnosis()">もう一度診断する</button>
+    </div>
   </section>
 </main>
 
@@ -899,9 +910,9 @@ ${improvementText}
     });
 
     if (res.ok) {
-      document.getElementById('form-area').style.display = 'none';
-      document.getElementById('thanks-msg').classList.add('show');
-      document.querySelectorAll('.blur-text').forEach(el => el.classList.add('revealed'));
+      document.getElementById('result-section').classList.add('hidden');
+      document.getElementById('thanks-section').classList.remove('hidden');
+      window.scrollTo({top:0, behavior:'smooth'});
     } else {
       alert('送信に失敗しました。もう一度お試しください。');
     }
