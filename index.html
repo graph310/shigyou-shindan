@@ -850,8 +850,7 @@ async function submitContact() {
     const def = pointDefs[p];
     const label = i === 0 ? 'Step1' : i === 1 ? 'Step2' : 'Step3';
     return def ? `${label}：${def.title}` : '';
-  }).join('
-');
+  }).join('\n');
 
   // スコアとランク
   let score = 0;
